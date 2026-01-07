@@ -17,3 +17,26 @@ export interface NewTransaction {
   date: string;
   type: 'income' | 'expense';
 }
+
+export interface Transaction {
+  id: string;
+  user_id: string;
+  description: string;
+  amount: number;
+  category: string;
+  date: string;
+  type: 'income' | 'expense';
+  payment_method?: 'credit' | 'debit'; // Opcional, pois Entrada não tem isso
+  is_recurring: boolean;               // Novo campo
+  created_at: string;
+}
+
+export interface NewTransaction {
+  description: string;
+  amount: number;
+  category: string;
+  date: string;
+  type: 'income' | 'expense';
+  payment_method?: 'credit' | 'debit';
+  is_recurring: boolean;
+}

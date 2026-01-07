@@ -3,34 +3,41 @@
 import { supabase } from '@/lib/supabaseClient'
 import { useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
   
   // Novos estados para o Magic Link
   const [email, setEmail] = useState('')
   const [linkSent, setLinkSent] = useState(false)
 
   useEffect(() => {
-    // Verifica sessão atual
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      setUser(session?.user ?? null)
-      setLoading(false)
+      if (session) {
+        // Se já tem sessão, vai direto pro Dashboard
+        router.push('/dashboard') 
+      } else {
+        setLoading(false)
+      }
     }
 
     checkUser()
 
-    // Escuta mudanças (Login/Logout)
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
-
-    return () => {
-      authListener.subscription.unsubscribe()
+    // Listener de Auth
+  const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' || session) {
+      router.push('/dashboard')
     }
-  }, [])
+  })
+
+  return () => {
+    authListener.subscription.unsubscribe()
+  }
+}, [router])
 
   // Função de Login com Magic Link
   const handleLogin = async (e: React.FormEvent) => {
